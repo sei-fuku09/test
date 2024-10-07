@@ -1,0 +1,176 @@
+/* 全体のリセット */
+body, h1, h2, p, a, button, textarea, main {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
+}
+
+/* ボディの基本スタイル */
+body {
+    background-color: #e6e5e4;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー */
+header {
+    background-color: #769cbf;
+    color: #e6e5e4;
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    padding: 15px 20px; /* パディングで高さ調整 */
+}
+
+h1{
+    padding: 0;
+    margin: 0;
+    font-size: 2em;
+}
+
+
+
+/* メイン */
+main {
+    flex: 1;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+main h2 {
+    font-size: 1.5em;
+    color: #769cbf;
+    margin-bottom: 10px;
+}
+
+/* 文字起こしセクション */
+.transcription-section {
+    background-color: #ffffff;
+    border: 2px solid #8fb3d1;
+    border-radius: 15px;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    resize: none;
+}
+
+/* コントロールセクション */
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #8fb3d1;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 600px;
+}
+
+button {
+    background-color: #8fb3d1;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #759ab5;
+}
+
+.settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings label {
+    font-size: 1em;
+}
+
+.settings input[type="range"] {
+    width: 150px;
+}
+
+#speed-display {
+    font-size: 1em;
+}
+
+/* フッター */
+footer {
+    background-color: #759ab5;
+    padding: 10px;
+    text-align: center;
+    color: #e6e5e4;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: #e6e5e4;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5em; /* 小さい画面ではフォントサイズを縮小 */
+    }
+
+    .transcription-section, .controls-section {
+        width: 90%;
+    }
+
+    button {
+        font-size: 0.9em;
+    }
+
+    textarea {
+        height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2em; /* さらに小さい画面での調整 */
+    }
+
+    .transcription-section, .controls-section {
+        width: 95%;
+    }
+
+    button {
+        font-size: 0.8em;
+    }
+
+    textarea {
+        height: 100px;
+    }
+}

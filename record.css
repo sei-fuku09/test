@@ -1,0 +1,150 @@
+/* 全体のリセット */
+body, h1, h2, p, a, button, input, footer, form, div {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
+}
+
+/* ボディの基本スタイル */
+body {
+    background-color: #e6e5e4;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー */
+header {
+    background-color: #769cbf;
+    color: #e6e5e4;
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    padding: 2vh 2vw; /* パディングで高さ調整 */
+}
+
+h1 {
+    padding: 0;
+    margin: 0;
+    font-size: 3vw; /* 画面の幅に応じたフォントサイズ */
+}
+
+/* メインのレイアウト */
+main {
+    flex: 1;
+    padding-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vh;
+}
+
+h2 {
+    font-size: 2.5vw;
+    color: #769cbf;
+    margin-bottom: 1vh;
+}
+
+/* メインのフォームコンテナ */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vh;
+    background-color: #ffffff;
+    border: 0.3vw solid #8fb3d1;
+    border-radius: 2vw;
+    padding: 2vh 2vw;
+    width: 80vw;
+    max-width: 600px;
+}
+
+input[type="file"] {
+    font-size: 1.8vw;
+    padding: 1.5vh 1vw;
+    border: 0.2vw solid #ccc;
+    border-radius: 1vw;
+    width: 100%;
+}
+
+/* ボタンのスタイル */
+button {
+    background-color: #8fb3d1;
+    color: #ffffff;
+    padding: 1.5vh 2vw;
+    border: none;
+    border-radius: 1vw;
+    cursor: pointer;
+    font-size: 1.8vw;
+    transition: background-color 0.3s ease;
+}
+
+button a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+button:hover {
+    background-color: #759ab5;
+}
+
+/* フッター */
+footer {
+    background-color: #759ab5;
+    width: 100%;
+    padding: 1vh 0;
+    text-align: center;
+    color: #e6e5e4;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: #e6e5e4;
+    text-decoration: none;
+    font-size: 1.5vw;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 4vw;
+    }
+
+    h2 {
+        font-size: 3.5vw;
+    }
+
+    form {
+        width: 90vw;
+    }
+
+    button {
+        font-size: 3.5vw;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 5vw;
+    }
+
+    h2 {
+        font-size: 4vw;
+    }
+
+    form {
+        width: 95vw;
+    }
+
+    button {
+        font-size: 4vw;
+    }
+}

@@ -1,0 +1,69 @@
+/* 全体のリセット */
+body, h1, h2, p, a, button, input, footer, form, div {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
+}
+
+/* ボディの基本スタイル */
+body {
+    background-color: #e6e5e4;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー */
+header {
+    background-color: #769cbf;
+    color: #e6e5e4;
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    padding: 2vh 2vw; /* パディングで高さ調整 */
+}
+
+h1 {
+    padding: 0;
+    margin: 0;
+    font-size: 3vw; /* 画面の幅に応じたフォントサイズ */
+}
+
+/* メインのレイアウト */
+main {
+    flex: 1;
+    padding-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2vh;
+}
+
+h2 {
+    font-size: 2.5vw;
+    color: #769cbf;
+    margin-bottom: 1vh;
+}
+/* フッター */
+footer {
+    background-color: #759ab5;
+    width: 100%;
+    padding: 1vh 0;
+    text-align: center;
+    color: #e6e5e4;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    color: #e6e5e4;
+    text-decoration: none;
+    font-size: 1.5vw;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
