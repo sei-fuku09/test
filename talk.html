@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聴覚障碍者に向けた補助アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>テキスト読み上げ</h1>
+    </header>
+    <main>
+        <section class="controls-section">
+            <textarea id="text-input" rows="5" cols="50" placeholder="テキストをここに入力してください。"></textarea>
+            <div class="settings">
+                <label for="playback-speed">再生速度:</label>
+                <input type="range" id="playback-speed" min="0" max="2" step="0.1" value="1">
+                <span id="speed-display">1.0</span>
+            </div>
+            <button id="play-sound">再生</button>
+            <button id="save-audio">保存</button>
+        </section>
+    </main>
+    <!-- JSファイルの読み込み -->
+    <script src="talk.js"></script>
+
+    <footer>
+
+    <p>
+		<a href="choice.html" >
+		<!--  aタグで囲われたものをリンクボタンにする href="ここにリンク先のアドレス(パス)を記述" -->
+	
+		TOPページへ➔
+		</a>
+	</p>
+    </footer>
+    
+
+</body>
+</html>
