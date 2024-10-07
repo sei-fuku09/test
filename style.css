@@ -1,0 +1,130 @@
+/* 全体のリセット */
+body, h1, p, a, button, header {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #e6e5e4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #769cbf;
+    color: #e6e5e4;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    text-align: center;
+    padding: 20px;
+}
+
+main {
+    background-color: #e6e5e4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    color: #333;
+}
+
+/* ボタンカード */
+.card {
+    margin-bottom: 2vw; /* ボタン間の隙間 */
+}
+
+/* スタイルドボタン */
+.styled-button {
+    display: flex;
+    flex-direction: row; /* ボタン内の要素を横に並べる */
+    align-items: center;
+    justify-content: center;
+    padding: 2vw; /* ボタンの内側のスペース */
+    width: 80vw; /* ビュー幅の80% */
+    max-width: 500px; /* 最大幅を500pxに制限 */
+    min-width: 250px; /* 最小幅を250pxに設定 */
+    height: auto;
+    aspect-ratio: 5 / 3; /* 縦横比の固定 */
+    border: 2px solid #a0bdd8;
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-align: center;
+    white-space: nowrap; /* テキストの改行を防ぐ */
+}
+
+.styled-button:hover {
+    background-color: #f0f4f8;
+    transform: translateY(-5px);
+}
+
+.styled-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.styled-button img {
+    width: 20vw; /* ビュー幅の20% */
+    height: auto;
+    max-height: 250px;
+    min-width: 200px; /* 最小幅を100pxに設定 */
+    margin-right: 2vw; /* 画像とテキストの間にスペースを追加 */
+}
+
+.button-text {
+    font-size: 2vw; /* ビュー幅の2% */
+    color: #333;
+    text-decoration: none;
+    word-wrap: break-word; /* 長い単語が折り返されないようにする */
+    white-space: nowrap; /* テキストの改行を防ぐ */
+}
+
+/* ボタンのリセット */
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .styled-button {
+        width: 90vw; /* ビュー幅の90% */
+        padding: 2vw;
+        min-width: 300px; /* 最小幅を300pxに設定 */
+    }
+    .styled-button img {
+        width: 25vw; /* ビュー幅の25% */
+        min-width: 120px; /* 最小幅を120pxに設定 */
+    }
+    .button-text {
+        font-size: 2.5vw; /* ビュー幅の2.5% */
+    }
+}
+
+@media (max-width: 480px) {
+    .styled-button {
+        padding: 3vw;
+        aspect-ratio: 1 / 1; /* よりスクエアな比率に変更 */
+        width: 95vw; /* ビュー幅の95% */
+        min-width: 250px; /* 最小幅を250pxに設定 */
+    }
+    .styled-button img {
+        width: 30vw; /* ビュー幅の30% */
+        min-width: 150px; /* 最小幅を150pxに設定 */
+    }
+    .button-text {
+        font-size: 3vw; /* ビュー幅の3% */
+    }
+}
