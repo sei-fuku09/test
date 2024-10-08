@@ -36,7 +36,7 @@ window.onload = function() {
 
                 const requestBody = {
                     config: {
-                        encoding: "LINEAR16",
+                        encoding: "FLAC",
                         sampleRateHertz: 16000,
                         languageCode: "ja-JP"
                     },
