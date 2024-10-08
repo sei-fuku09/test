@@ -12,13 +12,6 @@ window.onload = function() {
         if (file) {
             statusText.textContent = `ファイル名: ${file.name}`;
 
-            // FileReaderを使ってファイルを読み込み、Blob形式で保存
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                audioBlob = new Blob([e.target.result], { type: file.type });
-                console.log("ファイルが正常に読み込まれました");
-                startBtn.disabled = false; // 文字起こし開始ボタンを有効化
-            };
             reader.onerror = function(error) {
                 console.error("ファイル読み込み中にエラーが発生しました:", error);
                 statusText.textContent = 'ファイルの読み込みに失敗しました';
