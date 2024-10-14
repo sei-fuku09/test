@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リアルタイム音声認識と翻訳</title>
+    <link rel="stylesheet" href="css/realtime.css">
+</head>
+<body>
+    <header>
+        <h1>リアルタイム音声認識と翻訳</h1>
+    </header>
+
+    <main>
+        <!-- 文字起こしのセクション -->
+        <section class="transcription-section">
+            <h2>文字起こし結果</h2>
+            <textarea id="transcription" rows="10" cols="50" placeholder="ここに文字起こし結果が表示されます" readonly></textarea>
+        </section>
+
+        <!-- 音声認識コントロール -->
+        <button id="play-transcription">音声認識開始</button>
+        <button id="stop-transcription" disabled>音声認識停止</button>
+
+        <!-- 翻訳設定 -->
+        <h3>翻訳設定</h3>
+        <label for="translation-direction">翻訳方向:</label>
+        <select id="translation-direction">
+            <option value="ja-en">日本語 → 英語</option>
+            <option value="en-ja">英語 → 日本語</option>
+        </select>
+        <button id="translate-text">翻訳</button>
+
+        <!-- 翻訳結果表示 -->
+        <section class="translation-section">
+            <h2>翻訳結果</h2>
+            <textarea id="translation" rows="10" cols="50" placeholder="ここに翻訳結果が表示されます" readonly></textarea>
+        </section>
+
+        <!-- 保存ボタン -->
+        <button id="save-transcription">文字起こしを保存</button>
+    </main>
+
+    <!-- JSファイルの読み込み -->
+    <script src="color.js"></script>
+
+    <footer>
+        <p><a href="choice.html">TOPページへ➔</a></p>
+    </footer>
+</body>
+</html>
