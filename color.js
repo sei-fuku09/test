@@ -134,7 +134,7 @@ window.onload = function() {
             console.log("音量:", averageVolume);
 
             // 色の設定: 高い音量 -> 女性の声（赤色）、低い音量 -> 男性の声（青色）
-            if (averageVolume > 80 && currentColor !== "red") {
+            if (averageVolume > 100 && currentColor !== "red") {
                 resultText.style.color = "red"; // 高い音量 -> 女性の声（赤色）
                 currentColor = "red"; // 色が赤に変更されたことを記録
             } else if (averageVolume > 10 && currentColor !== "red" && currentColor !== "blue") {
