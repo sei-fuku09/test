@@ -101,12 +101,12 @@ window.onload = function() {
             });
     }
 
-    // 音声の高さとデシベルを監視して色を変更
+    // 音量のみに基づいて色を変更
     function monitorAudio() {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
 
-        function checkVoiceProperties() {
+        function checkVolume() {
             analyser.getByteFrequencyData(dataArray);
 
             let sum = 0;
@@ -116,68 +116,21 @@ window.onload = function() {
 
             const averageVolume = sum / bufferLength; // 音量の平均を取得
 
-            // ピッチ（声の高さ）を判別
-            analyser.getByteTimeDomainData(dataArray);
-            let pitch = detectPitch(dataArray, audioContext.sampleRate);
-
             // デバッグ情報の出力
-            console.log("ピッチ:", pitch, "音量:", averageVolume);
+            console.log("音量:", averageVolume);
 
-            // 色の設定: 仮に180Hz以上を「女性」、それ以下を「男性」とする
-            if (pitch > 180 && averageVolume > 20) {
-                resultText.style.color = "red"; // 高い音量とピッチ -> 女性の声（赤色）
-            } else if (pitch <= 180 && pitch >= 75 && averageVolume > 20) {
-                resultText.style.color = "blue"; // 低い音量とピッチ -> 男性の声（青色）
+            // 色の設定: 高い音量 -> 女性の声（赤色）、低い音量 -> 男性の声（青色）
+            if (averageVolume > 60) {
+                resultText.style.color = "red"; // 高い音量 -> 女性の声（赤色）
+            } else if (averageVolume > 30) {
+                resultText.style.color = "blue"; // 低い音量 -> 男性の声（青色）
             } else {
-                resultText.style.color = "black"; // 中間音量 -> 中立（黒色）
+                resultText.style.color = "black"; // 音量が低すぎる場合（黒色）
             }
 
-            requestAnimationFrame(checkVoiceProperties);
+            requestAnimationFrame(checkVolume);
         }
 
-        checkVoiceProperties();
+        checkVolume();
     }
-
-    // ピッチ（声の高さ）を推測する関数
-    function detectPitch(data, sampleRate) {
-        let sum = 0;
-        let rms = 0;
-        for (let i = 0; i < data.length; i++) {
-            sum += data[i];
-            rms += data[i] * data[i];
-        }
-        rms = Math.sqrt(rms / data.length);
-        if (rms < 0.01) return -1; // 無音
-
-        let r1 = 0, r2 = data.length - 1;
-        while (data[r1] < 128) r1++;
-        while (data[r2] < 128) r2--;
-
-        if (r2 - r1 < 2) return -1;
-
-        const buffer = data.slice(r1, r2);
-        const autocorr = new Array(buffer.length).fill(0);
-        for (let lag = 0; lag < buffer.length; lag++) {
-            for (let i = 0; i < buffer.length - lag; i++) {
-                autocorr[lag] += (buffer[i] - 128) * (buffer[i + lag] - 128);
-            }
-        }
-
-        let d = 0;
-        while (autocorr[d] > autocorr[d + 1]) d++;
-        let maxval = -1, maxpos = -1;
-        for (let i = d; i < buffer.length; i++) {
-            if (autocorr[i] > maxval) {
-                maxval = autocorr[i];
-                maxpos = i;
-            }
-        }
-
-        if (maxpos === -1) return -1;
-        const fundamentalFreq = sampleRate / maxpos;
-        return fundamentalFreq;
-    }
-
-    // 保存機能、翻訳機能のコードはそのまま
-    // ...
 };
