@@ -120,10 +120,13 @@ window.onload = function() {
             analyser.getByteTimeDomainData(dataArray);
             let pitch = detectPitch(dataArray, audioContext.sampleRate);
 
-            // 色の設定: 仮に150Hz以上を「女性」、それ以下を「男性」とする
-            if (pitch > 150 && averageVolume > 50) {
+            // デバッグ情報の出力
+            console.log("ピッチ:", pitch, "音量:", averageVolume);
+
+            // 色の設定: 仮に180Hz以上を「女性」、それ以下を「男性」とする
+            if (pitch > 180 && averageVolume > 20) {
                 resultText.style.color = "red"; // 高い音量とピッチ -> 女性の声（赤色）
-            } else if (pitch <= 150 && averageVolume > 50) {
+            } else if (pitch <= 180 && pitch >= 75 && averageVolume > 20) {
                 resultText.style.color = "blue"; // 低い音量とピッチ -> 男性の声（青色）
             } else {
                 resultText.style.color = "black"; // 中間音量 -> 中立（黒色）
