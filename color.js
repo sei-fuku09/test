@@ -12,6 +12,8 @@ window.onload = function() {
     let audioContext;
     let analyser;
     let mediaStreamSource;
+    let animationFrameId;
+    let currentColor = "black"; // 現在の色を追跡
 
     // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
@@ -45,14 +47,14 @@ window.onload = function() {
     // 音声認識停止
     stopBtn.onclick = function() {
         if (isRecognizing) {
-            recognition.stop();
-            console.log("音声認識を停止しました");
+            recognition.stop(); // 音声認識の停止
             isRecognizing = false;
             startBtn.disabled = false;
             stopBtn.disabled = true;
+            console.log("音声認識を停止しました");
 
-            // 音声解析を停止
-            if (audioContext) audioContext.close();
+            // 音声解析の停止
+            stopAudioAnalysis();
         }
     };
 
@@ -63,12 +65,13 @@ window.onload = function() {
         resultText.value += ' ' + transcript;
     };
 
-    // 音声認識が終了したら自動的に再開（ユーザーが停止するまで）
+    // 音声認識が終了したときの動作
     recognition.onend = function() {
-        console.log("音声認識が終了しました");
         if (isRecognizing) {
             console.log("音声認識を再開します");
-            recognition.start();  // 自動的に再開
+            recognition.start();  // 停止ボタンが押されていない場合のみ自動再開
+        } else {
+            console.log("音声認識を完全に停止しました");
         }
     };
 
@@ -101,6 +104,17 @@ window.onload = function() {
             });
     }
 
+    // 音声解析を停止
+    function stopAudioAnalysis() {
+        if (audioContext) {
+            audioContext.close();
+            audioContext = null;
+        }
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId); // 解析のループを停止
+        }
+    }
+
     // 音量のみに基づいて色を変更
     function monitorAudio() {
         const bufferLength = analyser.frequencyBinCount;
@@ -120,15 +134,16 @@ window.onload = function() {
             console.log("音量:", averageVolume);
 
             // 色の設定: 高い音量 -> 女性の声（赤色）、低い音量 -> 男性の声（青色）
-            if (averageVolume > 60) {
+            if (averageVolume > 60 && currentColor !== "red") {
                 resultText.style.color = "red"; // 高い音量 -> 女性の声（赤色）
-            } else if (averageVolume > 30) {
+                currentColor = "red"; // 色が赤に変更されたことを記録
+            } else if (averageVolume > 30 && currentColor !== "red" && currentColor !== "blue") {
                 resultText.style.color = "blue"; // 低い音量 -> 男性の声（青色）
-            } else {
-                resultText.style.color = "black"; // 音量が低すぎる場合（黒色）
-            }
+                currentColor = "blue"; // 色が青に変更されたことを記録
+            } 
 
-            requestAnimationFrame(checkVolume);
+            // 一度赤か青になったら、それ以上は変更しない
+            animationFrameId = requestAnimationFrame(checkVolume); // IDを保存して後でキャンセル可能に
         }
 
         checkVolume();
