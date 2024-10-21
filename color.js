@@ -1,11 +1,7 @@
 window.onload = function() {
     const startBtn = document.getElementById('play-transcription');
     const stopBtn = document.getElementById('stop-transcription');
-    const saveBtn = document.getElementById('save-transcription');
-    const translateBtn = document.getElementById('translate-text');
-    const translationDirection = document.getElementById('translation-direction');
     const resultText = document.getElementById('transcription');
-    const translationText = document.getElementById('translation');
 
     let recognition;
     let isRecognizing = false;
@@ -65,7 +61,7 @@ window.onload = function() {
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
         resultText.value += ' ' + transcript;
-        
+
         // 言葉を検知したのでピッチ計測を開始
         isSpeaking = true; // 話している状態に変更
         startPitchMeasurement();
@@ -128,55 +124,54 @@ window.onload = function() {
     // ピッチの計測を開始
     function startPitchMeasurement() {
         const bufferLength = analyser.fftSize;
-        const dataArray = new Uint8Array(bufferLength);
+        const dataArray = new Float32Array(bufferLength); // getFloatTimeDomainData用に変更
 
-        function detectPitch(data, sampleRate) {
-            // ピッチ検出のアルゴリズムをここに実装
-            let sum = 0;
+        function autoCorrelate(buf, sampleRate) {
+            let SIZE = buf.length;
+            let MAX_SAMPLES = Math.floor(SIZE / 2);
+            let best_offset = -1;
+            let best_correlation = 0;
             let rms = 0;
-            for (let i = 0; i < data.length; i++) {
-                sum += data[i];
-                rms += data[i] * data[i];
+            let foundGoodCorrelation = false;
+            let correlations = new Array(MAX_SAMPLES);
+
+            for (let i = 0; i < SIZE; i++) {
+                rms += buf[i] * buf[i];
             }
-            rms = Math.sqrt(rms / data.length);
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) // 無音と判定
+                return -1;
 
-            // 無音状態の判断
-            if (rms < 0.01) {
-                return -1; // 無音の場合はピッチを計測しない
-            }
+            let lastCorrelation = 1;
+            for (let offset = 0; offset < MAX_SAMPLES; offset++) {
+                let correlation = 0;
 
-            let r1 = 0, r2 = data.length - 1;
-            while (data[r1] < 128) r1++;
-            while (data[r2] < 128) r2--;
-
-            if (r2 - r1 < 2) return -1;
-
-            const buffer = data.slice(r1, r2);
-            const autocorr = new Array(buffer.length).fill(0);
-            for (let lag = 0; lag < buffer.length; lag++) {
-                for (let i = 0; i < buffer.length - lag; i++) {
-                    autocorr[lag] += (buffer[i] - 128) * (buffer[i + lag] - 128);
+                for (let i = 0; i < MAX_SAMPLES; i++) {
+                    correlation += Math.abs((buf[i]) - (buf[i + offset]));
                 }
-            }
-
-            let d = 0;
-            while (autocorr[d] > autocorr[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < buffer.length; i++) {
-                if (autocorr[i] > maxval) {
-                    maxval = autocorr[i];
-                    maxpos = i;
+                correlation = 1 - (correlation / MAX_SAMPLES);
+                correlations[offset] = correlation;
+                if ((correlation > 0.9) && (correlation > lastCorrelation)) {
+                    foundGoodCorrelation = true;
+                    if (correlation > best_correlation) {
+                        best_correlation = correlation;
+                        best_offset = offset;
+                    }
+                } else if (foundGoodCorrelation) {
+                    let shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
+                    return sampleRate / (best_offset + (8 * shift));
                 }
+                lastCorrelation = correlation;
             }
-
-            if (maxpos === -1) return -1;
-            const fundamentalFreq = sampleRate / maxpos;
-            return fundamentalFreq;
+            if (best_correlation > 0.01) {
+                return sampleRate / best_offset;
+            }
+            return -1;
         }
 
         function checkPitch() {
-            analyser.getByteTimeDomainData(dataArray);
-            let pitch = detectPitch(dataArray, audioContext.sampleRate);
+            analyser.getFloatTimeDomainData(dataArray); // Float32Arrayで時間領域のデータ取得
+            let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
 
             // ピッチが無音の場合は計測をスキップ
             if (pitch === -1) {
