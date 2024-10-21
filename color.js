@@ -129,7 +129,11 @@ window.onload = function() {
                 rms += data[i] * data[i];
             }
             rms = Math.sqrt(rms / data.length);
-            if (rms < 0.01) return -1; // 無音
+
+            // 無音状態の判断
+            if (rms < 0.01) {
+                return -1; // 無音の場合はピッチを計測しない
+            }
 
             let r1 = 0, r2 = data.length - 1;
             while (data[r1] < 128) r1++;
@@ -164,16 +168,21 @@ window.onload = function() {
             analyser.getByteTimeDomainData(dataArray);
             let pitch = detectPitch(dataArray, audioContext.sampleRate);
 
-            // デバッグ情報の出力
-            console.log("ピッチ:", pitch);
+            // ピッチが無音の場合は計測をスキップ
+            if (pitch === -1) {
+                console.log("無音状態です。ピッチは計測しません。");
+            } else {
+                // デバッグ情報の出力
+                console.log("ピッチ:", pitch);
 
-            // ピッチの範囲を基に性別を推定（ここでは簡略化して150Hzを基準とする）
-            if (pitch > 180 && currentColor !== "red") {
-                resultText.style.color = "red"; // 高いピッチ -> 女性の声（赤色）
-                currentColor = "red"; // 色が赤に変更されたことを記録
-            } else if (pitch > 75 && pitch <= 180 && currentColor !== "red" && currentColor !== "blue") {
-                resultText.style.color = "blue"; // 低いピッチ -> 男性の声（青色）
-                currentColor = "blue"; // 色が青に変更されたことを記録
+                // ピッチの範囲を基に性別を推定（ここでは簡略化して150Hzを基準とする）
+                if (pitch > 180 && currentColor !== "red") {
+                    resultText.style.color = "red"; // 高いピッチ -> 女性の声（赤色）
+                    currentColor = "red"; // 色が赤に変更されたことを記録
+                } else if (pitch > 75 && pitch <= 180 && currentColor !== "red" && currentColor !== "blue") {
+                    resultText.style.color = "blue"; // 低いピッチ -> 男性の声（青色）
+                    currentColor = "blue"; // 色が青に変更されたことを記録
+                }
             }
 
             // 一度赤か青になったら、それ以上は変更しない
