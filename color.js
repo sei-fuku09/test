@@ -14,6 +14,7 @@ window.onload = function() {
     let mediaStreamSource;
     let animationFrameId;
     let currentColor = "black"; // 現在の色を追跡
+    let isSpeaking = false; // 話している状態かどうかを追跡
 
     // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
@@ -49,6 +50,7 @@ window.onload = function() {
         if (isRecognizing) {
             recognition.stop(); // 音声認識の停止
             isRecognizing = false;
+            isSpeaking = false; // 話していない状態にリセット
             startBtn.disabled = false;
             stopBtn.disabled = true;
             console.log("音声認識を停止しました");
@@ -63,6 +65,10 @@ window.onload = function() {
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
         resultText.value += ' ' + transcript;
+        
+        // 言葉を検知したのでピッチ計測を開始
+        isSpeaking = true; // 話している状態に変更
+        startPitchMeasurement();
     };
 
     // 音声認識が終了したときの動作
@@ -73,6 +79,8 @@ window.onload = function() {
         } else {
             console.log("音声認識を完全に停止しました");
         }
+        // 言葉が終了したらピッチ計測を止める
+        isSpeaking = false;
     };
 
     // エラー処理
@@ -85,6 +93,8 @@ window.onload = function() {
             startBtn.disabled = false;
             stopBtn.disabled = true;
         }
+        // エラーが発生した場合もピッチ計測を止める
+        isSpeaking = false;
     };
 
     // マイク入力の解析セットアップ
@@ -96,7 +106,7 @@ window.onload = function() {
                 analyser = audioContext.createAnalyser();
                 mediaStreamSource.connect(analyser);
                 analyser.fftSize = 2048;
-                monitorAudio(); // 音声の高さ・デシベルを監視
+                // 初期状態ではピッチ計測を行わない
             })
             .catch(error => {
                 console.error("マイクのアクセスエラー:", error);
@@ -115,8 +125,8 @@ window.onload = function() {
         }
     }
 
-    // ピッチ（声の高さ）を基に色を変更
-    function monitorAudio() {
+    // ピッチの計測を開始
+    function startPitchMeasurement() {
         const bufferLength = analyser.fftSize;
         const dataArray = new Uint8Array(bufferLength);
 
@@ -185,10 +195,13 @@ window.onload = function() {
                 }
             }
 
-            // 一度赤か青になったら、それ以上は変更しない
-            animationFrameId = requestAnimationFrame(checkPitch); // IDを保存して後でキャンセル可能に
+            // 話している状態のときだけピッチ計測を続ける
+            if (isSpeaking) {
+                animationFrameId = requestAnimationFrame(checkPitch); // IDを保存して後でキャンセル可能に
+            }
         }
 
+        // ピッチ計測をスタート
         checkPitch();
     }
 };
