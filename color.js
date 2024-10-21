@@ -8,6 +8,7 @@ window.onload = function() {
     let audioContext;
     let analyser;
     let mediaStreamSource;
+    let filter;  // ノイズ除去用フィルタ
     let animationFrameId;
     let currentColor = "black"; // 現在の色を追跡
     let isSpeaking = false; // 話している状態かどうかを追跡
@@ -99,7 +100,13 @@ window.onload = function() {
                 mediaStreamSource = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 2048;  // FFTサイズの設定
-                mediaStreamSource.connect(analyser);
+                
+                // ノイズ除去用のフィルタを追加
+                filter = audioContext.createBiquadFilter();
+                filter.type = "lowpass"; // ローパスフィルタで高周波ノイズを除去
+                filter.frequency.setValueAtTime(3000, audioContext.currentTime); // 3000Hz以下を通す
+                mediaStreamSource.connect(filter); 
+                filter.connect(analyser); // フィルタをアナライザーに接続
             })
             .catch(error => {
                 console.error("マイクのアクセスエラー:", error);
@@ -131,9 +138,9 @@ window.onload = function() {
             // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
             for (let i = 0; i < bufferLength; i++) {
                 let frequency = i * audioContext.sampleRate / analyser.fftSize;
-                if (frequency < 300) {  // 300Hz以下を低周波数帯とする
+                if (frequency < 250) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 300 && frequency < 3000) {  // 300Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
