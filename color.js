@@ -139,7 +139,7 @@ window.onload = function() {
                 rms += buf[i] * buf[i];
             }
             rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.001) // 無音と判定するしきい値を緩和
+            if (rms < 0.005) // 無音と判定するしきい値を緩和
                 return -1;
 
             let lastCorrelation = 1;
