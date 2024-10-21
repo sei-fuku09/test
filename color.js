@@ -135,17 +135,26 @@ window.onload = function() {
             let lowFreqEnergy = 0;
             let highFreqEnergy = 0;
 
+            console.log("----- スペクトル解析結果 -----");
+            
             // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
             for (let i = 0; i < bufferLength; i++) {
                 let frequency = i * audioContext.sampleRate / analyser.fftSize;
-                if (frequency < 400) {  // 400Hz以下を低周波数帯とする
+                
+                // 各周波数成分のエネルギーをコンソールに出力
+                console.log(`周波数: ${frequency.toFixed(2)}Hz, エネルギー: ${dataArray[i]}`);
+
+                if (frequency < 250) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 400 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
 
             // 低周波数帯域と高周波数帯域のエネルギー比で性別を判定
+            console.log(`低周波数帯のエネルギー合計: ${lowFreqEnergy}`);
+            console.log(`高周波数帯のエネルギー合計: ${highFreqEnergy}`);
+
             if (highFreqEnergy > lowFreqEnergy && currentColor !== "red") {
                 resultText.style.color = "red"; // 高い周波数が多い -> 女性の声
                 currentColor = "red";
