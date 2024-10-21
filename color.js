@@ -139,7 +139,7 @@ window.onload = function() {
                 rms += buf[i] * buf[i];
             }
             rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.0001) // 無音と判定するしきい値を緩和
+            if (rms < 0.001) // 無音と判定するしきい値を緩和
                 return -1;
 
             let lastCorrelation = 1;
@@ -176,6 +176,9 @@ window.onload = function() {
             // ピッチが無音の場合は計測をスキップ
             if (pitch === -1) {
                 console.log("無音状態です。ピッチは計測しません。");
+            } else if (pitch < 50 || pitch > 500) {
+                console.log("異常なピッチ値を検出しました:", pitch);
+                // 50Hzから500Hzの範囲を超えるピッチは無視
             } else {
                 // デバッグ情報の出力
                 console.log("ピッチ:", pitch);
