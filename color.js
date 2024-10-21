@@ -11,7 +11,6 @@ window.onload = function() {
     let filter;  // ノイズ除去用フィルタ
     let animationFrameId;
     let isSpeaking = false; // 話している状態かどうかを追跡
-    let currentText = '';  // 全体の認識テキストを追跡
 
     // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
@@ -68,9 +67,11 @@ window.onload = function() {
             color = determineColor();  // 話している内容に基づく色を取得
         }
 
-        // 現在のテキストに色付きの新しいテキストを追加
-        currentText += `<span style="color: ${color};">${transcript}</span>`;
-        resultText.innerHTML = currentText;  // 色付きのHTMLを設定
+        // 新しい <span> 要素を作成して色付きのテキストを追加
+        let span = document.createElement('span');
+        span.style.color = color;
+        span.textContent = transcript;
+        resultText.appendChild(span);  // <span> を resultText に追加
 
         // 言葉を検知したのでスペクトル解析を開始
         isSpeaking = true; // 話している状態に変更
