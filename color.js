@@ -62,9 +62,9 @@ window.onload = function() {
         console.log("音声認識結果:", transcript);
         resultText.value += ' ' + transcript;
 
-        // 言葉を検知したのでピッチ計測を開始
+        // 言葉を検知したのでスペクトル解析を開始
         isSpeaking = true; // 話している状態に変更
-        startPitchMeasurement();
+        startSpectralAnalysis();
     };
 
     // 音声認識が終了したときの動作
@@ -75,7 +75,6 @@ window.onload = function() {
         } else {
             console.log("音声認識を完全に停止しました");
         }
-        // 言葉が終了したらピッチ計測を止める
         isSpeaking = false;
     };
 
@@ -89,7 +88,6 @@ window.onload = function() {
             startBtn.disabled = false;
             stopBtn.disabled = true;
         }
-        // エラーが発生した場合もピッチ計測を止める
         isSpeaking = false;
     };
 
@@ -100,9 +98,8 @@ window.onload = function() {
             .then(stream => {
                 mediaStreamSource = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;  // FFTサイズの設定
                 mediaStreamSource.connect(analyser);
-                analyser.fftSize = 2048;
-                // 初期状態ではピッチ計測を行わない
             })
             .catch(error => {
                 console.error("マイクのアクセスエラー:", error);
@@ -121,85 +118,41 @@ window.onload = function() {
         }
     }
 
-    // ピッチの計測を開始
-    function startPitchMeasurement() {
-        const bufferLength = analyser.fftSize;
-        const dataArray = new Float32Array(bufferLength); // getFloatTimeDomainData用に変更
+    // スペクトル解析の開始
+    function startSpectralAnalysis() {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
 
-        function autoCorrelate(buf, sampleRate) {
-            let SIZE = buf.length;
-            let MAX_SAMPLES = Math.floor(SIZE / 2);
-            let best_offset = -1;
-            let best_correlation = 0;
-            let rms = 0;
-            let foundGoodCorrelation = false;
-            let correlations = new Array(MAX_SAMPLES);
+        function analyzeSpectrum() {
+            analyser.getByteFrequencyData(dataArray); // 周波数データを取得
+            let lowFreqEnergy = 0;
+            let highFreqEnergy = 0;
 
-            for (let i = 0; i < SIZE; i++) {
-                rms += buf[i] * buf[i];
-            }
-            rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.001) // 無音と判定するしきい値を緩和
-                return -1;
-
-            let lastCorrelation = 1;
-            for (let offset = 0; offset < MAX_SAMPLES; offset++) {
-                let correlation = 0;
-
-                for (let i = 0; i < MAX_SAMPLES; i++) {
-                    correlation += Math.abs((buf[i]) - (buf[i + offset]));
-                }
-                correlation = 1 - (correlation / MAX_SAMPLES);
-                correlations[offset] = correlation;
-                if ((correlation > 0.9) && (correlation > lastCorrelation)) {
-                    foundGoodCorrelation = true;
-                    if (correlation > best_correlation) {
-                        best_correlation = correlation;
-                        best_offset = offset;
-                    }
-                } else if (foundGoodCorrelation) {
-                    let shift = (correlations[best_offset + 1] - correlations[best_offset - 1]) / correlations[best_offset];
-                    return sampleRate / (best_offset + (8 * shift));
-                }
-                lastCorrelation = correlation;
-            }
-            if (best_correlation > 0.01) {
-                return sampleRate / best_offset;
-            }
-            return -1;
-        }
-
-        function checkPitch() {
-            analyser.getFloatTimeDomainData(dataArray); // Float32Arrayで時間領域のデータ取得
-            let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
-
-            // ピッチが無音の場合は計測をスキップ
-            if (pitch === -1) {
-                console.log("無音状態です。ピッチは計測しません。");
-            } else if (pitch < 50 || pitch > 500) {
-                console.log("異常なピッチ値を検出しました:", pitch);
-                // 50Hzから500Hzの範囲を超えるピッチは無視
-            } else {
-                // デバッグ情報の出力
-                console.log("ピッチ:", pitch);
-
-                // ピッチの範囲を基に性別を推定（ここでは簡略化して150Hzを基準とする）
-                if (pitch > 180 && currentColor !== "red") {
-                    resultText.style.color = "red"; // 高いピッチ -> 女性の声（赤色）
-                    currentColor = "red"; // 色が赤に変更されたことを記録
-                } else if (pitch > 75 && pitch <= 180 && currentColor !== "red" && currentColor !== "blue") {
-                    resultText.style.color = "blue"; // 低いピッチ -> 男性の声（青色）
-                    currentColor = "blue"; // 色が青に変更されたことを記録
+            // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
+            for (let i = 0; i < bufferLength; i++) {
+                let frequency = i * audioContext.sampleRate / analyser.fftSize;
+                if (frequency < 300) {  // 300Hz以下を低周波数帯とする
+                    lowFreqEnergy += dataArray[i];
+                } else if (frequency > 300 && frequency < 3000) {  // 300Hz〜3000Hzを高周波数帯とする
+                    highFreqEnergy += dataArray[i];
                 }
             }
 
-            // 話している状態のときだけピッチ計測を続ける
+            // 低周波数帯域と高周波数帯域のエネルギー比で性別を判定
+            if (highFreqEnergy > lowFreqEnergy && currentColor !== "red") {
+                resultText.style.color = "red"; // 高い周波数が多い -> 女性の声
+                currentColor = "red";
+            } else if (lowFreqEnergy > highFreqEnergy && currentColor !== "blue") {
+                resultText.style.color = "blue"; // 低い周波数が多い -> 男性の声
+                currentColor = "blue";
+            }
+
+            // 話している状態のときのみループを続ける
             if (isSpeaking) {
-                animationFrameId = requestAnimationFrame(checkPitch); // IDを保存して後でキャンセル可能に
+                animationFrameId = requestAnimationFrame(analyzeSpectrum);
             }
         }
 
-        // ピッチ計測をスタート
-        checkPitch();
+        analyzeSpectrum();  // スペクトル解析のループを開始
     }
 };
