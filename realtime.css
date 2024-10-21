@@ -174,3 +174,8 @@ footer a:hover {
         height: 100px;
     }
 }
+
+/* realtime.css に追加 */
+.reversed {
+    transform: rotate(180deg);
+}
