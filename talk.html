@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>聴覚障碍者に向けた会話補助アプリ</title>
     <link rel="stylesheet" href="realtime.css">
+    <style>
+        /* 反転用スタイル */
+        .reversed {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -22,22 +28,15 @@
             </div>
             <button id="play-sound">再生</button>
             <button id="save-audio">保存</button>
+            <!-- 追加するボタン -->
+            <button id="reverse-text">文字を反転</button>
         </section>
     </main>
     <!-- JSファイルの読み込み -->
     <script src="talk.js"></script>
 
     <footer>
-
-    <p>
-		<a href="choice.html" >
-		<!--  aタグで囲われたものをリンクボタンにする href="ここにリンク先のアドレス(パス)を記述" -->
-	
-		TOPページへ➔
-		</a>
-	</p>
+        <p><a href="choice.html">TOPページへ➔</a></p>
     </footer>
-    
-
 </body>
 </html>
