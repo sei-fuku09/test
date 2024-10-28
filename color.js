@@ -1,4 +1,4 @@
-window.onload = function() {
+　window.onload = function() {
     const startBtn = document.getElementById('play-transcription');
     const stopBtn = document.getElementById('stop-transcription');
     const resultText = document.getElementById('transcription');
@@ -148,9 +148,9 @@ window.onload = function() {
                 // 各周波数成分のエネルギーをコンソールに出力
                 console.log(`周波数: ${frequency.toFixed(2)}Hz, エネルギー: ${dataArray[i]}`);
 
-                if (frequency < 400) {  // 250Hz以下を低周波数帯とする
+                if (frequency < 1000) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 400 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 1000 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
