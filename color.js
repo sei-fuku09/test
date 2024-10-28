@@ -1,4 +1,4 @@
-　window.onload = function() {
+window.onload = function() {
     const startBtn = document.getElementById('play-transcription');
     const stopBtn = document.getElementById('stop-transcription');
     const resultText = document.getElementById('transcription');
@@ -19,7 +19,7 @@
     } else if ('SpeechRecognition' in window) {
         recognition = new SpeechRecognition();
     } else {
-        alert('このブラウザは音声認識をサポートしていません');
+        alert('このブラウザは音声認識をサポートしていません。ChromeまたはSafariの最新バージョンで試してください。');
         return;
     }
 
@@ -86,7 +86,9 @@
     // エラー処理
     recognition.onerror = function(event) {
         console.error("音声認識エラー:", event.error);
+        alert(`音声認識エラー: ${event.error}`); // エラー内容をアラートで表示
         resultText.value = 'エラー: ' + event.error;
+
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
             alert("マイクのアクセスが拒否されました。設定を確認してください。");
             isRecognizing = false;
@@ -148,9 +150,9 @@
                 // 各周波数成分のエネルギーをコンソールに出力
                 console.log(`周波数: ${frequency.toFixed(2)}Hz, エネルギー: ${dataArray[i]}`);
 
-                if (frequency < 1000) {  // 250Hz以下を低周波数帯とする
+                if (frequency < 1200) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 1000 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 1200 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
