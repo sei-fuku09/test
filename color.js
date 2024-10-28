@@ -59,9 +59,13 @@ window.onload = function() {
 
     // 音声認識結果をテキストエリアに表示
     recognition.onresult = function(event) {
+        console.log("音声認識イベントが発生しました");
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
+
+        // テキストエリアに文字起こしを追加
         resultText.value += ' ' + transcript;
+        resultText.scrollTop = resultText.scrollHeight;  // スクロールを常に下に維持
 
         // 言葉を検知したのでスペクトル解析を開始
         isSpeaking = true; // 話している状態に変更
