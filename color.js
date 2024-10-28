@@ -175,9 +175,9 @@ window.onload = function() {
             // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
             for (let i = 0; i < bufferLength; i++) {
                 let frequency = i * audioContext.sampleRate / analyser.fftSize;
-                if (frequency < 250) {  // 250Hz以下を低周波数帯とする
+                if (frequency < 400) {  // 400Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 400 && frequency < 3000) {  // 400Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
