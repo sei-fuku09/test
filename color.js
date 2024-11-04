@@ -13,13 +13,13 @@ window.onload = function() {
     let currentColor = "black"; // 現在の色を追跡
     let isSpeaking = false; // 話している状態かどうかを追跡
 
-    // Web Speech APIを使った音声認識のセットアップ
+   // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
     } else if ('SpeechRecognition' in window) {
         recognition = new SpeechRecognition();
     } else {
-        alert('このブラウザは音声認識をサポートしていません。ChromeまたはSafariの最新バージョンで試してください。');
+        alert('このブラウザは音声認識をサポートしていません');
         return;
     }
 
@@ -36,22 +36,19 @@ window.onload = function() {
             isRecognizing = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
-
-            // マイク入力の解析を開始
-            setupAudioAnalysis();
         }
     };
 
     // 音声認識停止
     stopBtn.onclick = function() {
         if (isRecognizing) {
-            recognition.stop(); // 音声認識の停止
+            recognition.stop();
+            console.log("音声認識を停止しました");
             isRecognizing = false;
-            isSpeaking = false; // 話していない状態にリセット
             startBtn.disabled = false;
             stopBtn.disabled = true;
-            console.log("音声認識を停止しました");
-
+        }
+    };
             // 音声解析の停止
             stopAudioAnalysis();
         }
@@ -59,9 +56,9 @@ window.onload = function() {
 
     // 音声認識結果をテキストエリアに表示
     recognition.onresult = function(event) {
-        console.log("音声認識イベントが発生しました");
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
+        resultText.value += ' ' + transcript;
 
         // テキストエリアに文字起こしを追加
         resultText.value += ' ' + transcript;
@@ -86,16 +83,13 @@ window.onload = function() {
     // エラー処理
     recognition.onerror = function(event) {
         console.error("音声認識エラー:", event.error);
-        alert(`音声認識エラー: ${event.error}`); // エラー内容をアラートで表示
         resultText.value = 'エラー: ' + event.error;
-
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
             alert("マイクのアクセスが拒否されました。設定を確認してください。");
             isRecognizing = false;
             startBtn.disabled = false;
             stopBtn.disabled = true;
         }
-        isSpeaking = false;
     };
 
     // マイク入力の解析セットアップ
@@ -176,5 +170,45 @@ window.onload = function() {
         }
 
         analyzeSpectrum();  // スペクトル解析のループを開始
+    }
+
+ // 翻訳APIを呼び出す関数
+    function translateText(text, direction) {
+        return new Promise((resolve, reject) => {
+            const apiKey = 'AIzaSyCDvA-j10o8HeWZFJ7TbcdpSSRyxiwdd7w';  // Google Cloud Translation APIキー
+            let targetLanguage = '';
+
+            if (direction === 'ja-en') {
+                targetLanguage = 'en';
+            } else if (direction === 'en-ja') {
+                targetLanguage = 'ja';
+            }
+
+            const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+            const body = {
+                q: text,
+                target: targetLanguage,
+                format: 'text'
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.data && data.data.translations && data.data.translations[0].translatedText) {
+                    resolve(data.data.translations[0].translatedText);
+                } else {
+                    reject("翻訳結果がありません");
+                }
+            })
+            .catch(error => {
+                reject("翻訳中にエラーが発生しました: " + error);
+            });
+        });
     }
 };
