@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リアルタイム音声認識と翻訳</title>
+    <link rel="stylesheet" href="realtime.css">
+</head>
+<body>
+    <header>
+        <h1>リアルタイム音声認識と翻訳</h1>
+    </header>
+
+    <main>
+        <!-- 発話者ごとの文字起こしセクション -->
+        <section class="transcription-section">
+            <h2>発話者1の文字起こし結果</h2>
+            <textarea id="transcription1" rows="5" cols="50" readonly></textarea>
+
+            <h2>発話者2の文字起こし結果</h2>
+            <textarea id="transcription2" rows="5" cols="50" readonly></textarea>
+        </section>
+
+        <!-- 音声認識コントロール -->
+        <div class="botan">
+            <button id="start-recognition1">発話者1 音声認識開始</button>
+            <button id="stop-recognition1" disabled>発話者1 音声認識停止</button>
+
+            <button id="start-recognition2">発話者2 音声認識開始</button>
+            <button id="stop-recognition2" disabled>発話者2 音声認識停止</button>
+        </div>
+
+        <p><a href="realcolor.html">声紋ページへ➔</a></p>
+
+        <footer>
+            <p><a href="choice.html">TOPページへ➔</a></p>
+        </footer>
+    </main>
+
+    <!-- JSファイルの読み込み -->
+    <script src="multi.js"></script>
+</body>
+</html>
