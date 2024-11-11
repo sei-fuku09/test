@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>発話者識別付きリアルタイム音声認識</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>発話者識別付きリアルタイム音声認識</h1>
+    </header>
+
+    <main>
+        <section class="transcription-section">
+            <h2>文字起こし結果</h2>
+            <textarea id="transcription" rows="10" cols="50" placeholder="ここに文字起こし結果が表示されます" readonly></textarea>
+        </section>
+
+        <div class="botan">
+            <button id="play-transcription">音声認識開始</button>
+            <button id="stop-transcription" disabled>音声認識停止</button>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
