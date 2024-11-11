@@ -8,12 +8,11 @@ window.onload = function() {
     let audioContext;
     let analyser;
     let mediaStreamSource;
-    let filter;
+    let filter;  // ノイズ除去用フィルタ
     let animationFrameId;
-    let currentColor = "black";
-    let isSpeaking = false;
+    let isSpeaking = false; // 話している状態かどうかを追跡
 
-    // Web Speech APIのセットアップ
+    // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
     } else if ('SpeechRecognition' in window) {
@@ -23,8 +22,8 @@ window.onload = function() {
         return;
     }
 
-    recognition.lang = 'ja-JP';
-    recognition.interimResults = false;
+    recognition.lang = 'ja-JP';  // 日本語に設定
+    recognition.interimResults = false;  // 確定結果のみを取得
     recognition.maxAlternatives = 1;
 
     // 音声認識開始
@@ -32,10 +31,12 @@ window.onload = function() {
         if (!isRecognizing) {
             recognition.start();
             console.log("音声認識を開始しました");
-            resultText.value = '';
+            resultText.innerHTML = ''; // 初期化
             isRecognizing = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
+
+            // マイク入力の解析を開始
             setupAudioAnalysis();
         }
     };
@@ -43,39 +44,82 @@ window.onload = function() {
     // 音声認識停止
     stopBtn.onclick = function() {
         if (isRecognizing) {
-            recognition.stop();
-            console.log("音声認識を停止しました");
+            recognition.stop(); // 音声認識の停止
             isRecognizing = false;
+            isSpeaking = false; // 話していない状態にリセット
             startBtn.disabled = false;
             stopBtn.disabled = true;
+            console.log("音声認識を停止しました");
+
+            // 音声解析の停止
             stopAudioAnalysis();
         }
     };
 
-    // 音声認識結果を表示
+    // 音声認識結果をテキストエリアに表示し、色をリアルタイムで変更
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
-        resultText.value += ' ' + transcript;
-        resultText.scrollTop = resultText.scrollHeight;
 
-        isSpeaking = true;
+        // ここで、スペクトル解析結果に基づいて、色を判定
+        let color = "black";  // デフォルトは黒
+        if (isSpeaking) {
+            color = determineColor();  // 話している内容に基づく色を取得
+        }
+
+        // 新しい <span> 要素を作成して色付きのテキストを追加
+        let span = document.createElement('span');
+        span.style.color = color;
+        span.textContent = transcript;
+        resultText.appendChild(span);  // <span> を resultText に追加
+
+        // 言葉を検知したのでスペクトル解析を開始
+        isSpeaking = true; // 話している状態に変更
         startSpectralAnalysis();
     };
 
+    // 色の判定ロジック
+    function determineColor() {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        analyser.getByteFrequencyData(dataArray); // 周波数データを取得
+        let lowFreqEnergy = 0;
+        let highFreqEnergy = 0;
+
+        // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
+        for (let i = 0; i < bufferLength; i++) {
+            let frequency = i * audioContext.sampleRate / analyser.fftSize;
+            if (frequency < 250) {  // 250Hz以下を低周波数帯とする
+                lowFreqEnergy += dataArray[i];
+            } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                highFreqEnergy += dataArray[i];
+            }
+        }
+
+        // エネルギー比で色を判定
+        if (highFreqEnergy > lowFreqEnergy) {
+            return "red";  // 女性の声
+        } else {
+            return "blue";  // 男性の声
+        }
+    }
+
+    // 音声認識が終了したときの動作
     recognition.onend = function() {
         if (isRecognizing) {
             console.log("音声認識を再開します");
-            recognition.start();
+            recognition.start();  // 停止ボタンが押されていない場合のみ自動再開
         } else {
             console.log("音声認識を完全に停止しました");
         }
         isSpeaking = false;
     };
 
+    // エラー処理
     recognition.onerror = function(event) {
         console.error("音声認識エラー:", event.error);
-        alert("エラー: " + event.error);
+        resultText.innerHTML = 'エラー: ' + event.error;
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
             alert("マイクのアクセスが拒否されました。設定を確認してください。");
             isRecognizing = false;
@@ -85,19 +129,21 @@ window.onload = function() {
         isSpeaking = false;
     };
 
+    // マイク入力の解析セットアップ
     function setupAudioAnalysis() {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
                 mediaStreamSource = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-
+                analyser.fftSize = 2048;  // FFTサイズの設定
+                
+                // ノイズ除去用のフィルタを追加
                 filter = audioContext.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.setValueAtTime(3000, audioContext.currentTime);
-                mediaStreamSource.connect(filter);
-                filter.connect(analyser);
+                filter.type = "lowpass"; // ローパスフィルタで高周波ノイズを除去
+                filter.frequency.setValueAtTime(3000, audioContext.currentTime); // 3000Hz以下を通す
+                mediaStreamSource.connect(filter); 
+                filter.connect(analyser); // フィルタをアナライザーに接続
             })
             .catch(error => {
                 console.error("マイクのアクセスエラー:", error);
@@ -105,47 +151,43 @@ window.onload = function() {
             });
     }
 
+    // 音声解析を停止
     function stopAudioAnalysis() {
         if (audioContext) {
             audioContext.close();
             audioContext = null;
         }
         if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
+            cancelAnimationFrame(animationFrameId); // 解析のループを停止
         }
     }
 
+    // スペクトル解析の開始
     function startSpectralAnalysis() {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
 
         function analyzeSpectrum() {
-            analyser.getByteFrequencyData(dataArray);
+            analyser.getByteFrequencyData(dataArray); // 周波数データを取得
             let lowFreqEnergy = 0;
             let highFreqEnergy = 0;
 
+            // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
             for (let i = 0; i < bufferLength; i++) {
                 let frequency = i * audioContext.sampleRate / analyser.fftSize;
-                if (frequency < 1200) {
+                if (frequency < 250) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 1200 && frequency < 3000) {
+                } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
             }
 
-            if (highFreqEnergy > lowFreqEnergy && currentColor !== "red") {
-                resultText.style.color = "red";
-                currentColor = "red";
-            } else if (lowFreqEnergy > highFreqEnergy && currentColor !== "blue") {
-                resultText.style.color = "blue";
-                currentColor = "blue";
-            }
-
+            // 話している状態のときのみループを続ける
             if (isSpeaking) {
                 animationFrameId = requestAnimationFrame(analyzeSpectrum);
             }
         }
 
-        analyzeSpectrum();
+        analyzeSpectrum();  // スペクトル解析のループを開始
     }
 };
