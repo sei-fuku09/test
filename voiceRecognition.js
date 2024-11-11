@@ -8,6 +8,7 @@ window.onload = function() {
 
     let recognition;
     let isRecognizing = false;
+    let finalTranscript = ''; // 全ての確定結果を保持する変数
 
     // Web Speech APIを使った音声認識のセットアップ
     if ('webkitSpeechRecognition' in window) {
@@ -28,7 +29,6 @@ window.onload = function() {
         if (!isRecognizing) {
             recognition.start();
             console.log("音声認識を開始しました");
-            resultText.value = ''; // 初期化
             isRecognizing = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
@@ -46,22 +46,21 @@ window.onload = function() {
         }
     };
 
-    // 音声認識結果をリアルタイムでテキストエリアに表示
+    // 音声認識結果をリアルタイムでテキストエリアに追加表示
     recognition.onresult = function(event) {
         let interimTranscript = '';  // 中間結果用
-        let finalTranscript = '';    // 確定結果用
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
 
             if (event.results[i].isFinal) {
-                finalTranscript += transcript + ' ';  // 確定結果は保持
+                finalTranscript += transcript + ' ';  // 確定結果を追加
             } else {
                 interimTranscript += transcript;  // 中間結果を追加
             }
         }
 
-        // 確定結果 + 中間結果をリアルタイムで表示
+        // テキストエリアに既存の確定結果 + 中間結果をリアルタイムで表示
         resultText.value = finalTranscript + interimTranscript;
         resultText.scrollTop = resultText.scrollHeight;  // スクロールを常に下に維持
     };
