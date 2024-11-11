@@ -1,7 +1,6 @@
 window.onload = function() {
     const startBtn = document.getElementById('play-transcription');
     const stopBtn = document.getElementById('stop-transcription');
-    const saveBtn = document.getElementById('save-transcription');
     const translateBtn = document.getElementById('translate-text');
     const translationDirection = document.getElementById('translation-direction');
     const resultText = document.getElementById('transcription');
@@ -21,7 +20,7 @@ window.onload = function() {
     }
 
     recognition.lang = 'ja-JP';  // 日本語に設定
-    recognition.interimResults = false;  // 確定結果のみを取得
+    recognition.interimResults = true;  // 中間結果を取得するように設定
     recognition.maxAlternatives = 1;
 
     // 音声認識開始
@@ -47,11 +46,24 @@ window.onload = function() {
         }
     };
 
-    // 音声認識結果をテキストエリアに表示
+    // 音声認識結果をリアルタイムでテキストエリアに表示
     recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        console.log("音声認識結果:", transcript);
-        resultText.value += ' ' + transcript;
+        let interimTranscript = '';  // 中間結果用
+        let finalTranscript = '';    // 確定結果用
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';  // 確定結果は保持
+            } else {
+                interimTranscript += transcript;  // 中間結果を追加
+            }
+        }
+
+        // 確定結果 + 中間結果をリアルタイムで表示
+        resultText.value = finalTranscript + interimTranscript;
+        resultText.scrollTop = resultText.scrollHeight;  // スクロールを常に下に維持
     };
 
     // 音声認識が終了したら自動的に再開（ユーザーが停止するまで）
