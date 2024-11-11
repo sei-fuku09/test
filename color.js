@@ -10,6 +10,7 @@ window.onload = function() {
     let mediaStreamSource;
     let filter;  // ノイズ除去用フィルタ
     let animationFrameId;
+    let currentColor = "black"; // 現在の色を追跡
     let isSpeaking = false; // 話している状態かどうかを追跡
 
     // Web Speech APIを使った音声認識のセットアップ
@@ -31,7 +32,7 @@ window.onload = function() {
         if (!isRecognizing) {
             recognition.start();
             console.log("音声認識を開始しました");
-            resultText.innerHTML = ''; // 初期化
+            resultText.value = ''; // 初期化
             isRecognizing = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
@@ -56,54 +57,16 @@ window.onload = function() {
         }
     };
 
-    // 音声認識結果をテキストエリアに表示し、色をリアルタイムで変更
+    // 音声認識結果をテキストエリアに表示
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript;
         console.log("音声認識結果:", transcript);
-
-        // ここで、スペクトル解析結果に基づいて、色を判定
-        let color = "black";  // デフォルトは黒
-        if (isSpeaking) {
-            color = determineColor();  // 話している内容に基づく色を取得
-        }
-
-        // 新しい <span> 要素を作成して色付きのテキストを追加
-        let span = document.createElement('span');
-        span.style.color = color;
-        span.textContent = transcript;
-        resultText.appendChild(span);  // <span> を resultText に追加
+        resultText.value += ' ' + transcript;
 
         // 言葉を検知したのでスペクトル解析を開始
         isSpeaking = true; // 話している状態に変更
         startSpectralAnalysis();
     };
-
-    // 色の判定ロジック
-    function determineColor() {
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        analyser.getByteFrequencyData(dataArray); // 周波数データを取得
-        let lowFreqEnergy = 0;
-        let highFreqEnergy = 0;
-
-        // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
-        for (let i = 0; i < bufferLength; i++) {
-            let frequency = i * audioContext.sampleRate / analyser.fftSize;
-            if (frequency < 250) {  // 250Hz以下を低周波数帯とする
-                lowFreqEnergy += dataArray[i];
-            } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
-                highFreqEnergy += dataArray[i];
-            }
-        }
-
-        // エネルギー比で色を判定
-        if (highFreqEnergy > lowFreqEnergy) {
-            return "red";  // 女性の声
-        } else {
-            return "blue";  // 男性の声
-        }
-    }
 
     // 音声認識が終了したときの動作
     recognition.onend = function() {
@@ -119,7 +82,7 @@ window.onload = function() {
     // エラー処理
     recognition.onerror = function(event) {
         console.error("音声認識エラー:", event.error);
-        resultText.innerHTML = 'エラー: ' + event.error;
+        resultText.value = 'エラー: ' + event.error;
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
             alert("マイクのアクセスが拒否されました。設定を確認してください。");
             isRecognizing = false;
@@ -172,14 +135,32 @@ window.onload = function() {
             let lowFreqEnergy = 0;
             let highFreqEnergy = 0;
 
+            console.log("----- スペクトル解析結果 -----");
+            
             // 周波数の範囲をチェック（低周波数帯と高周波数帯を分ける）
             for (let i = 0; i < bufferLength; i++) {
                 let frequency = i * audioContext.sampleRate / analyser.fftSize;
-                if (frequency < 250) {  // 250Hz以下を低周波数帯とする
+                
+                // 各周波数成分のエネルギーをコンソールに出力
+                console.log(`周波数: ${frequency.toFixed(2)}Hz, エネルギー: ${dataArray[i]}`);
+
+                if (frequency < 400) {  // 250Hz以下を低周波数帯とする
                     lowFreqEnergy += dataArray[i];
-                } else if (frequency > 250 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
+                } else if (frequency > 400 && frequency < 3000) {  // 250Hz〜3000Hzを高周波数帯とする
                     highFreqEnergy += dataArray[i];
                 }
+            }
+
+            // 低周波数帯域と高周波数帯域のエネルギー比で性別を判定
+            console.log(`低周波数帯のエネルギー合計: ${lowFreqEnergy}`);
+            console.log(`高周波数帯のエネルギー合計: ${highFreqEnergy}`);
+
+            if (highFreqEnergy > lowFreqEnergy && currentColor !== "red") {
+                resultText.style.color = "red"; // 高い周波数が多い -> 女性の声
+                currentColor = "red";
+            } else if (lowFreqEnergy > highFreqEnergy && currentColor !== "blue") {
+                resultText.style.color = "blue"; // 低い周波数が多い -> 男性の声
+                currentColor = "blue";
             }
 
             // 話している状態のときのみループを続ける
@@ -190,4 +171,4 @@ window.onload = function() {
 
         analyzeSpectrum();  // スペクトル解析のループを開始
     }
-};
+};    
