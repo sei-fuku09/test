@@ -41,7 +41,7 @@ recognition.onresult = function(event) {
 };
 
 async function sendAudioToServer(transcript) {
-    const response = await fetch('https://your-server-url.com/api/identify-speaker', {
+    const response = await fetch('https://peaceful-tide-429307-m0.an.r.appspot.com//api/identify-speaker', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
